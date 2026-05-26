@@ -97,6 +97,18 @@ export const promotions = mysqlTable("promotions", {
 export type Promotion = typeof promotions.$inferSelect;
 export type InsertPromotion = typeof promotions.$inferInsert;
 
+// Tabela de Histórico de Status do Pedido
+export const orderStatusHistory = mysqlTable("orderStatusHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  status: mysqlEnum("status", ["pending", "confirmed", "shipped", "delivered", "cancelled"]).notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type OrderStatusHistory = typeof orderStatusHistory.$inferSelect;
+export type InsertOrderStatusHistory = typeof orderStatusHistory.$inferInsert;
+
 // Relações
 export const usersRelations = relations(users, ({ many }) => ({
   cartItems: many(cartItems),
@@ -114,10 +126,7 @@ export const cartItemsRelations = relations(cartItems, ({ one }) => ({
   product: one(products, { fields: [cartItems.productId], references: [products.id] }),
 }));
 
-export const ordersRelations = relations(orders, ({ one, many }) => ({
-  user: one(users, { fields: [orders.userId], references: [users.id] }),
-  items: many(orderItems),
-}));
+
 
 export const orderItemsRelations = relations(orderItems, ({ one }) => ({
   order: one(orders, { fields: [orderItems.orderId], references: [orders.id] }),
@@ -126,4 +135,14 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
 
 export const promotionsRelations = relations(promotions, ({ one }) => ({
   product: one(products, { fields: [promotions.productId], references: [products.id] }),
+}));
+
+export const orderStatusHistoryRelations = relations(orderStatusHistory, ({ one }) => ({
+  order: one(orders, { fields: [orderStatusHistory.orderId], references: [orders.id] }),
+}));
+
+export const ordersRelationsWithHistory = relations(orders, ({ one, many }) => ({
+  user: one(users, { fields: [orders.userId], references: [users.id] }),
+  items: many(orderItems),
+  statusHistory: many(orderStatusHistory),
 }));

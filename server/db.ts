@@ -1,6 +1,6 @@
-import { eq, and, gte, lte, desc } from "drizzle-orm";
+import { eq, desc, and, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, cartItems, orders, orderItems, promotions } from "../drizzle/schema";
+import { InsertUser, users, products, cartItems, orders, orderItems, promotions, orderStatusHistory } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -238,4 +238,42 @@ export async function createPromotion(productId: number, discountPercentage: num
     endDate,
     isActive: true,
   });
+}
+
+// Funções de Histórico de Status
+export async function addOrderStatusHistory(
+  orderId: number,
+  status: string,
+  description?: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    await db.insert(orderStatusHistory).values({
+      orderId,
+      status: status as any,
+      description: description || null,
+    });
+  } catch (error) {
+    console.error("[Database] Failed to add order status history:", error);
+    throw error;
+  }
+}
+
+export async function getOrderStatusHistory(orderId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const history = await db
+      .select()
+      .from(orderStatusHistory)
+      .where(eq(orderStatusHistory.orderId, orderId))
+      .orderBy(desc(orderStatusHistory.createdAt));
+    return history;
+  } catch (error) {
+    console.error("[Database] Failed to get order status history:", error);
+    return [];
+  }
 }

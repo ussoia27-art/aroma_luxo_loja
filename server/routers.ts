@@ -123,7 +123,14 @@ export const appRouter = router({
           })
         );
         
-        return { ...order, items: enrichedItems };
+        const statusHistory = await db.getOrderStatusHistory(order.id);
+        return { ...order, items: enrichedItems, statusHistory };
+      }),
+
+    statusHistory: publicProcedure
+      .input(z.object({ orderId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getOrderStatusHistory(input.orderId);
       }),
   }),
 

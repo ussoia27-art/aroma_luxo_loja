@@ -25,11 +25,11 @@
 - [x] Exibir produtos por categoria (Floral, Cítrico, Amadeirado, Infantil)
 - [x] Mostrar imagem, nome, código, descrição e preço
 - [x] Implementar botão "Adicionar ao Carrinho"
-- [ ] Criar página "Mais Vendidos" com produtos em destaque
+- [x] Criar página "Mais Vendidos" com produtos em destaque
 
 ## Carrinho de Compras
 - [x] Implementar adição de itens ao carrinho (persistente no BD)
-- [ ] Exibir contador de itens no ícone do carrinho
+- [x] Exibir contador de itens no ícone do carrinho
 - [x] Criar página do Carrinho com listagem de itens
 - [x] Implementar alteração de quantidade de itens
 - [x] Implementar remoção de itens
@@ -40,8 +40,8 @@
 - [x] Criar sistema de promoções com desconto por tempo limitado
 - [x] Implementar countdown regressivo de 24 horas
 - [x] Exibir produtos em promoção na página inicial
-- [ ] Criar página dedicada a Promoções
-- [ ] Atualizar automaticamente promoções a cada 24h
+- [x] Criar página dedicada a Promoções
+- [x] Atualizar automaticamente promoções a cada 24h
 
 ## Checkout & Pagamento
 - [x] Criar página de Checkout com resumo do pedido
@@ -54,23 +54,23 @@
 - [x] Exibir instruções de pagamento conforme método selecionado
 
 ## Rastreamento de Pedido
-- [ ] Criar página de Rastreamento de Pedido
-- [ ] Permitir busca por código de pedido
-- [ ] Exibir status atual do pedido
-- [ ] Exibir histórico de atualizações do pedido
-- [ ] Mostrar data e hora de cada atualização
+- [x] Criar página de Rastreamento de Pedido
+- [x] Permitir busca por código de pedido
+- [x] Exibir status atual do pedido
+- [x] Exibir histórico de atualizações do pedido
+- [x] Mostrar data e hora de cada atualização
 
 ## Páginas Institucionais
-- [ ] Criar página "Sobre Nós" com informações da loja
-- [ ] Criar página "Contato" com formulário
+- [x] Criar página "Sobre Nós" com informações da loja
+- [x] Criar página "Contato" com formulário
 - [x] Criar página "Início" com destaques e CTAs
 
 ## Navegação & Layout
 - [x] Implementar header com logo e navegação
-- [ ] Adicionar ícone do carrinho com contador no header
+- [x] Adicionar ícone do carrinho com contador no header
 - [x] Implementar footer com links e informações
 - [x] Criar navegação responsiva para mobile
-- [ ] Implementar menu hamburger para dispositivos móveis
+- [x] Implementar menu hamburger para dispositivos móveis
 
 ## APIs Backend (tRPC)
 - [x] Criar procedure para listar produtos
@@ -84,20 +84,20 @@
 - [x] Criar procedure para listar pedidos do usuário
 - [x] Criar procedure para buscar pedido por código
 - [x] Criar procedure para listar promoções ativas
-- [ ] Criar procedure para atualizar status do pedido
+- [x] Criar procedure para atualizar status do pedido
 
 ## Testes
 - [x] Testar fluxo de autenticação
 - [x] Testar adição/remoção de itens do carrinho
 - [x] Testar persistência do carrinho no BD
 - [x] Testar criação de pedido
-- [ ] Testar rastreamento de pedido
+- [x] Testar rastreamento de pedido
 - [x] Testar countdown de promoções
-- [ ] Testar responsividade em mobile
+- [x] Testar responsividade em mobile
 
 ## Deployment
 - [x] Revisar segurança e validações
 - [x] Otimizar performance
 - [x] Testar em navegadores modernos
-- [ ] Criar checkpoint final
-- [ ] Publicar site
+- [x] Criar checkpoint final
+- [x] Publicar site

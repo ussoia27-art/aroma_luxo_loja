@@ -15,6 +15,13 @@
       "when": 1779825249808,
       "tag": "0001_overjoyed_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1779825721600,
+      "tag": "0002_previous_supernaut",
+      "breakpoints": true
     }
   ]
 }
