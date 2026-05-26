@@ -1,11 +1,13 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { z } from "zod";
+import * as db from "./db";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
+  
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -17,12 +19,128 @@ export const appRouter = router({
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  // ===== PRODUTOS =====
+  products: router({
+    list: publicProcedure.query(async () => {
+      return await db.getAllProducts();
+    }),
+
+    byCategory: publicProcedure
+      .input(z.object({ category: z.string() }))
+      .query(async ({ input }) => {
+        return await db.getProductsByCategory(input.category);
+      }),
+
+    byId: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getProductById(input.id);
+      }),
+  }),
+
+  // ===== CARRINHO =====
+  cart: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const items = await db.getCartItems(ctx.user.id);
+      // Enriquecer com dados do produto
+      const enriched = await Promise.all(
+        items.map(async (item) => {
+          const product = await db.getProductById(item.productId);
+          return { ...item, product };
+        })
+      );
+      return enriched;
+    }),
+
+    add: protectedProcedure
+      .input(z.object({ productId: z.number(), quantity: z.number().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        await db.addToCart(ctx.user.id, input.productId, input.quantity);
+        return { success: true };
+      }),
+
+    remove: protectedProcedure
+      .input(z.object({ productId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        await db.removeFromCart(ctx.user.id, input.productId);
+        return { success: true };
+      }),
+
+    updateQuantity: protectedProcedure
+      .input(z.object({ productId: z.number(), quantity: z.number().min(0) }))
+      .mutation(async ({ input, ctx }) => {
+        await db.updateCartQuantity(ctx.user.id, input.productId, input.quantity);
+        return { success: true };
+      }),
+
+    clear: protectedProcedure.mutation(async ({ ctx }) => {
+      await db.clearCart(ctx.user.id);
+      return { success: true };
+    }),
+  }),
+
+  // ===== PEDIDOS =====
+  orders: router({
+    create: protectedProcedure
+      .input(z.object({
+        items: z.array(z.object({
+          productId: z.number(),
+          quantity: z.number().min(1),
+          priceAtPurchase: z.number(),
+        })),
+        totalPrice: z.number(),
+        paymentMethod: z.enum(['pix', 'boleto', 'cartao']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const orderCode = await db.createOrder(ctx.user.id, input.totalPrice, input.paymentMethod);
+        
+        if (orderCode) {
+          const order = await db.getOrderByCode(orderCode);
+          if (order) {
+            await db.addOrderItems(order.id, input.items);
+            await db.clearCart(ctx.user.id);
+          }
+        }
+        
+        return { orderCode, success: !!orderCode };
+      }),
+
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getUserOrders(ctx.user.id);
+    }),
+
+    byCode: publicProcedure
+      .input(z.object({ orderCode: z.string() }))
+      .query(async ({ input }) => {
+        const order = await db.getOrderByCode(input.orderCode);
+        if (!order) return null;
+        
+        const items = await db.getOrderItems(order.id);
+        const enrichedItems = await Promise.all(
+          items.map(async (item) => {
+            const product = await db.getProductById(item.productId);
+            return { ...item, product };
+          })
+        );
+        
+        return { ...order, items: enrichedItems };
+      }),
+  }),
+
+  // ===== PROMOÇÕES =====
+  promotions: router({
+    active: publicProcedure.query(async () => {
+      const promos = await db.getActivePromotions();
+      // Enriquecer com dados do produto
+      const enriched = await Promise.all(
+        promos.map(async (promo) => {
+          const product = await db.getProductById(promo.productId);
+          return { ...promo, product };
+        })
+      );
+      return enriched;
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

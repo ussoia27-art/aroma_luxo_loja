@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, products, cartItems, orders, orderItems, promotions } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,153 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ===== PRODUTOS =====
+export async function getAllProducts() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(products);
+}
+
+export async function getProductById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getProductsByCategory(category: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(products).where(eq(products.category, category));
+}
+
+// ===== CARRINHO =====
+export async function getCartItems(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(cartItems).where(eq(cartItems.userId, userId));
+}
+
+export async function addToCart(userId: number, productId: number, quantity: number = 1) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const existing = await db.select().from(cartItems).where(
+    and(eq(cartItems.userId, userId), eq(cartItems.productId, productId))
+  ).limit(1);
+  
+  if (existing.length > 0) {
+    // Atualizar quantidade
+    await db.update(cartItems).set({ quantity: existing[0].quantity + quantity }).where(
+      and(eq(cartItems.userId, userId), eq(cartItems.productId, productId))
+    );
+  } else {
+    // Adicionar novo item
+    await db.insert(cartItems).values({ userId, productId, quantity });
+  }
+}
+
+export async function removeFromCart(userId: number, productId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(cartItems).where(
+    and(eq(cartItems.userId, userId), eq(cartItems.productId, productId))
+  );
+}
+
+export async function updateCartQuantity(userId: number, productId: number, quantity: number) {
+  const db = await getDb();
+  if (!db) return;
+  if (quantity <= 0) {
+    await removeFromCart(userId, productId);
+  } else {
+    await db.update(cartItems).set({ quantity }).where(
+      and(eq(cartItems.userId, userId), eq(cartItems.productId, productId))
+    );
+  }
+}
+
+export async function clearCart(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(cartItems).where(eq(cartItems.userId, userId));
+}
+
+// ===== PEDIDOS =====
+export async function createOrder(userId: number, totalPrice: number, paymentMethod: string) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const orderCode = `PED-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+  
+  await db.insert(orders).values({
+    orderCode,
+    userId,
+    totalPrice: totalPrice.toString(),
+    paymentMethod,
+    status: 'pending',
+    paymentStatus: 'pending',
+  });
+  
+  return orderCode;
+}
+
+export async function addOrderItems(orderId: number, items: { productId: number; quantity: number; priceAtPurchase: number }[]) {
+  const db = await getDb();
+  if (!db) return;
+  
+  for (const item of items) {
+    await db.insert(orderItems).values({
+      orderId,
+      productId: item.productId,
+      quantity: item.quantity,
+      priceAtPurchase: item.priceAtPurchase.toString(),
+    });
+  }
+}
+
+export async function getOrderByCode(orderCode: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(orders).where(eq(orders.orderCode, orderCode)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserOrders(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
+}
+
+export async function getOrderItems(orderId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+}
+
+// ===== PROMOÇÕES =====
+export async function getActivePromotions() {
+  const db = await getDb();
+  if (!db) return [];
+  const now = new Date();
+  return await db.select().from(promotions).where(
+    and(
+      eq(promotions.isActive, true),
+      gte(promotions.endDate, now),
+      lte(promotions.startDate, now)
+    )
+  );
+}
+
+export async function createPromotion(productId: number, discountPercentage: number, startDate: Date, endDate: Date) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.insert(promotions).values({
+    productId,
+    discountPercentage,
+    startDate,
+    endDate,
+    isActive: true,
+  });
+}
