@@ -36,6 +36,34 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await db.getProductById(input.id);
       }),
+
+    filtered: publicProcedure
+      .input(z.object({
+        category: z.string().optional(),
+        minPrice: z.number().optional(),
+        maxPrice: z.number().optional(),
+        sortBy: z.enum(['price_asc', 'price_desc', 'popularity', 'newest']).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getFilteredProducts({
+          category: input.category,
+          minPrice: input.minPrice,
+          maxPrice: input.maxPrice,
+          sortBy: input.sortBy,
+        });
+      }),
+
+    byPriceRange: publicProcedure
+      .input(z.object({ minPrice: z.number(), maxPrice: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getProductsByPriceRange(input.minPrice, input.maxPrice);
+      }),
+
+    topProducts: publicProcedure
+      .input(z.object({ limit: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await db.getTopProducts(input.limit || 10);
+      }),
   }),
 
   // ===== CARRINHO =====

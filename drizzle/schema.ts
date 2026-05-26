@@ -36,6 +36,7 @@ export const products = mysqlTable("products", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   imageUrl: text("imageUrl"),
   stock: int("stock").default(999).notNull(),
+  popularity: int("popularity").default(0).notNull(), // Número de vendas/visualizações
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

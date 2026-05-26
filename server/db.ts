@@ -277,3 +277,79 @@ export async function getOrderStatusHistory(orderId: number) {
     return [];
   }
 }
+
+
+// Funções de Filtro Avançado
+export async function getFilteredProducts(filters: {
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sortBy?: 'price_asc' | 'price_desc' | 'popularity' | 'newest';
+}) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const conditions: any[] = [];
+
+    if (filters.category) {
+      conditions.push(eq(products.category, filters.category));
+    }
+
+    if (filters.minPrice !== undefined) {
+      conditions.push(gte(products.price, filters.minPrice.toString()));
+    }
+
+    if (filters.maxPrice !== undefined) {
+      conditions.push(lte(products.price, filters.maxPrice.toString()));
+    }
+
+    let query: any = conditions.length > 0 ? db.select().from(products).where(and(...(conditions as any))) : db.select().from(products);
+
+    if (filters.sortBy === 'price_asc') {
+      query = query.orderBy(products.price);
+    } else if (filters.sortBy === 'price_desc') {
+      query = query.orderBy(desc(products.price));
+    } else if (filters.sortBy === 'popularity') {
+      query = query.orderBy(desc(products.popularity));
+    } else if (filters.sortBy === 'newest') {
+      query = query.orderBy(desc(products.createdAt));
+    }
+
+    return await query;
+  } catch (error) {
+    console.error("[Database] Failed to get filtered products:", error);
+    return [];
+  }
+}
+
+export async function getProductsByPriceRange(minPrice: number, maxPrice: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    return await db
+      .select()
+      .from(products)
+      .where(and(gte(products.price, minPrice.toString()), lte(products.price, maxPrice.toString())));
+  } catch (error) {
+    console.error("[Database] Failed to get products by price range:", error);
+    return [];
+  }
+}
+
+export async function getTopProducts(limit: number = 10) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    return await db
+      .select()
+      .from(products)
+      .orderBy(desc(products.popularity))
+      .limit(limit);
+  } catch (error) {
+    console.error("[Database] Failed to get top products:", error);
+    return [];
+  }
+}

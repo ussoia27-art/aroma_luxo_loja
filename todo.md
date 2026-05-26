@@ -101,3 +101,15 @@
 - [x] Testar em navegadores modernos
 - [x] Criar checkpoint final
 - [x] Publicar site
+
+
+## Filtros Avançados (Nova Funcionalidade)
+- [x] Adicionar campo `popularity` na tabela de produtos
+- [x] Criar procedure para filtrar por preço (mín/máx)
+- [x] Criar procedure para ordenar por popularidade
+- [x] Criar procedure para ordenar por preço (crescente/decrescente)
+- [x] Atualizar página Catálogo com UI de filtros
+- [x] Implementar sidebar de filtros com checkboxes
+- [x] Adicionar seletor de ordenação
+- [x] Implementar range slider de preço
+- [x] Adicionar testes para filtros
