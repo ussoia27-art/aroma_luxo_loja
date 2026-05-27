@@ -113,3 +113,10 @@
 - [x] Adicionar seletor de ordenação
 - [x] Implementar range slider de preço
 - [x] Adicionar testes para filtros
+
+
+## Correções (Bug Fixes)
+- [x] Corrigir erro 404 na rota /promocoes
+- [x] Criar página de Promoções com countdown em tempo real
+- [x] Adicionar procedure `promotions.list` ao backend
+- [x] Remover estilos inline duplicados no Home.tsx

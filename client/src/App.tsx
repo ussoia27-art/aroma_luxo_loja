@@ -10,6 +10,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import TrackOrder from "./pages/TrackOrder";
+import Promotions from "./pages/Promotions";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path={"/checkout"} component={Checkout} />
       <Route path={"/confirmacao"} component={OrderConfirmation} />
       <Route path={"/rastreamento"} component={TrackOrder} />
+      <Route path={"/promocoes"} component={Promotions} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

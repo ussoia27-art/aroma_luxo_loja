@@ -175,6 +175,10 @@ export const appRouter = router({
       );
       return enriched;
     }),
+
+    list: publicProcedure.query(async () => {
+      return await db.getActivePromotions();
+    }),
   }),
 });
 
