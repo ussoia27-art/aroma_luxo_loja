@@ -120,3 +120,4 @@
 - [x] Criar página de Promoções com countdown em tempo real
 - [x] Adicionar procedure `promotions.list` ao backend
 - [x] Remover estilos inline duplicados no Home.tsx
+- [x] Corrigir erro 404 na rota /sobre
