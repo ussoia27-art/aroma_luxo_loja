@@ -12,6 +12,17 @@ export default function Cart() {
   const [, setLocation] = useLocation();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
+  // Mover hooks para fora da condicional - sempre executar
+  const { data: cartItems, refetch } = trpc.cart.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const removeFromCartMutation = trpc.cart.remove.useMutation({
+    onSuccess: () => refetch(),
+  });
+  const updateQuantityMutation = trpc.cart.updateQuantity.useMutation({
+    onSuccess: () => refetch(),
+  });
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -28,14 +39,6 @@ export default function Cart() {
       </div>
     );
   }
-
-  const { data: cartItems, refetch } = trpc.cart.list.useQuery();
-  const removeFromCartMutation = trpc.cart.remove.useMutation({
-    onSuccess: () => refetch(),
-  });
-  const updateQuantityMutation = trpc.cart.updateQuantity.useMutation({
-    onSuccess: () => refetch(),
-  });
 
   const total = cartItems?.reduce((sum, item) => {
     const price = parseFloat(item.product?.price || '0');
